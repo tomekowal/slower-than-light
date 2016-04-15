@@ -5,13 +5,15 @@ import Html.Events exposing (onClick)
 
 type alias Model =
   { metal : Int
-  , counter : Int
+  , counter : Maybe Int
+  , work_time : Int
   }
 
 init : Int -> Int -> Model
-init metal counter =
+init metal work_time =
   { metal = metal
-  , counter = counter
+  , counter = Nothing
+  , work_time = work_time
   }
 
 type Action
@@ -22,15 +24,15 @@ update : Action -> Model -> Model
 update action model =
   case action of
     DeployDrill ->
-      { model | counter = 5 }
+      { model | counter = Just model.work_time }
     Tick ->
       case model.counter of
-        1 -> { model
-               | metal = model.metal + 1
-               , counter = 0 }
-        0 -> model
-        time -> { model
-                  | counter = time - 1 }
+        Just 0 -> { model
+                  | metal = model.metal + 1
+                  , counter = Nothing }
+        Nothing -> model
+        Just time -> { model
+                     | counter = Just (time - 1) }
 
 view : Signal.Address Action -> Model -> Html
 view address model =

@@ -9,8 +9,8 @@ type alias Model =
   { drill : Drill.Model }
 
 init : Int -> Int -> (Model, Effects Action)
-init metal counter =
-  ({ drill = Drill.init metal counter }, Effects.none)
+init metal work_time =
+  ({ drill = Drill.init metal work_time }, Effects.none)
 
 type Action
   = Tick

@@ -11,7 +11,7 @@ ticks =
   Signal.map (\(timeStamp, tick) -> Game.Tick) (timestamp (every second))
 
 app =
-  StartApp.start { init = init 0 0
+  StartApp.start { init = init 0 2
                  , view = view
                  , update = update
                  , inputs = [ticks] }
