@@ -1,6 +1,7 @@
 module Drill (Model, init, Action(..), update, view) where
 
 import Html exposing (Html, text, div, button)
+import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 
 type alias Model =
@@ -34,10 +35,26 @@ update action model =
         Just time -> { model
                      | counter = Just (time - 1) }
 
+buttonStyle =
+  style
+    [ ("position", "relative")
+    , ("text-align", "center")
+    , ("border", "1px solid black")
+    , ("width", "100px")
+    , ("margin-bottom", "5px")
+    , ("padding", "5px 10px")
+    , ("cursor", "pointer")
+    , ("-webkit-touch-callout", "none")
+    , ("-webkit-user-select", "none")
+    , ("-khtml-user-select", "none")
+    , ("-moz-user-select", "none")
+    , ("-ms-user-select", "none")
+    , ("user-select", "none")]
+
 view : Signal.Address Action -> Model -> Html
 view address model =
     div []
         [ text ("metal: " ++ toString model.metal)
         , text (toString model.counter)
-        , button [ onClick address DeployDrill ] [ text "deploy the drill" ]
+        , div [ onClick address DeployDrill, buttonStyle ] [ text "deploy the drill" ]
         ]
