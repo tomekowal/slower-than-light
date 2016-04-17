@@ -8,7 +8,7 @@ import Drill
 type alias Model =
   { drill : Drill.Model }
 
-init : Int -> Int -> (Model, Effects Action)
+init : Float -> Float -> (Model, Effects Action)
 init metal work_time =
   ({ drill = Drill.init metal work_time }, Effects.none)
 

@@ -5,12 +5,12 @@ import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 
 type alias Model =
-  { metal : Int
-  , counter : Maybe Int
-  , work_time : Int
+  { metal : Float
+  , counter : Maybe Float
+  , work_time : Float
   }
 
-init : Int -> Int -> Model
+init : Float -> Float -> Model
 init metal work_time =
   { metal = metal
   , counter = Nothing
@@ -35,7 +35,7 @@ update action model =
         Just time -> { model
                      | counter = Just (time - 1) }
 
-buttonStyle =
+buttonStyle textColor =
   style
     [ ("position", "relative")
     , ("text-align", "center")
@@ -49,12 +49,38 @@ buttonStyle =
     , ("-khtml-user-select", "none")
     , ("-moz-user-select", "none")
     , ("-ms-user-select", "none")
-    , ("user-select", "none")]
+    , ("user-select", "none") 
+    , ("color", textColor) ]
+
+coolDownStyle percent =
+  style
+    [ ("position", "absolute")
+    , ("top", "0px")
+    , ("left", "0px")
+    , ("z-index", "-1")
+    , ("height", "100%")
+    , ("background-color", "#DDDDDD")
+    , ("overflow", "hidden")
+    , ("width", (toString percent) ++ "%")]
 
 view : Signal.Address Action -> Model -> Html
 view address model =
-    div []
-        [ text ("metal: " ++ toString model.metal)
-        , text (toString model.counter)
-        , div [ onClick address DeployDrill, buttonStyle ] [ text "deploy the drill" ]
-        ]
+  case model.counter of
+    Just counter ->
+      divWithCounter address model counter
+    Nothing ->
+      divWithoutCounter address model
+
+divWithoutCounter address model =
+  div []
+      [ text ("metal: " ++ toString model.metal)
+      , div [ buttonStyle "black", onClick address DeployDrill ]
+            [ text "deploy the drill" ]]
+
+divWithCounter address model counter =
+  div []
+      [ text ("metal: " ++ toString model.metal)
+      , div [ buttonStyle "grey" ]
+            [ text "deploy the drill" 
+            , div [ coolDownStyle (counter / model.work_time * 100) ] []]
+      ]
