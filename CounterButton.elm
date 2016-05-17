@@ -1,25 +1,29 @@
-module Drill exposing (Model, init, Msg(..), update, view)
+module CounterButton (Model, init, Msg(..), update, view) where
 
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 
 type alias Model =
-  { metal : Float
+  { resource : Float
+  , resource_name : String
   , counter : Maybe Float
   , work_time : Float
+  , button_text : String
   }
 
 init : Float -> Float -> Model
-init metal work_time =
-  { metal = metal
+init resource_name button_text =
+  { resource = 0 
+  , resource_name = resource_name
   , counter = Nothing
-  , work_time = work_time
+  , work_time = 0 
+  , button_text = button_text
   }
 
 type Msg
   = Tick
-  | DeployDrill
+  | Click
 
 update : Msg -> Model -> Model
 update action model =
@@ -29,7 +33,7 @@ update action model =
     Tick ->
       case model.counter of
         Just 0 -> { model
-                  | metal = model.metal + 1
+                  | resource = model.resource + 1
                   , counter = Nothing }
         Nothing -> model
         Just time -> { model
@@ -63,23 +67,23 @@ coolDownStyle percent =
     , ("overflow", "hidden")
     , ("width", (toString percent) ++ "%")]
 
-view : Model -> Html Msg
-view model =
+view : Signal.Address Msg -> Model -> Html
+view address model =
   case model.counter of
     Just counter ->
-      divWithCounter model counter
+      divWithCounter address model counter
     Nothing ->
-      divWithoutCounter model
+      divWithoutCounter address model
 
-divWithoutCounter model =
+divWithoutCounter address model =
   div []
-      [ text ("metal: " ++ toString model.metal)
-      , div [ buttonStyle "black", onClick DeployDrill ]
+      [ text ("resource: " ++ toString model.resource)
+      , div [ buttonStyle "black", onClick address DeployDrill ]
             [ text "deploy the drill" ]]
 
-divWithCounter model counter =
+divWithCounter address model counter =
   div []
-      [ text ("metal: " ++ toString model.metal)
+      [ text ("resource: " ++ toString model.resource)
       , div [ buttonStyle "grey" ]
             [ text "deploy the drill" 
             , div [ coolDownStyle (counter / model.work_time * 100) ] []]

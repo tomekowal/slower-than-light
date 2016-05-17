@@ -1,20 +1,10 @@
 import Html exposing (Html, text, div, button)
 import Html.Events exposing (onClick)
-import StartApp
-import Time exposing (..)
-import Signal exposing (Signal, map)
-import Effects exposing (Effects)
-import Game exposing (init, view, update, Action)
-
-ticks : Signal Action
-ticks =
-  Signal.map (\(timeStamp, tick) -> Game.Tick) (timestamp (every (second/10)))
-
-app =
-  StartApp.start { init = init 0 200
-                 , view = view
-                 , update = update
-                 , inputs = [ticks] }
+import Html.App as App
+import Game exposing (init, view, update, Msg, subscriptions)
 
 main =
-  app.html
+  App.program { init = init 0 200
+              , view = view
+              , update = update
+              , subscriptions = subscriptions }

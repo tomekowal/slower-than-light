@@ -1,34 +1,37 @@
-module Game (init, update, view, Action(..)) where
+module Game exposing (init, update, view, Msg(..), subscriptions) 
 
 import Html exposing (Html, text, div, button)
 import Html.Events exposing (onClick)
-import Effects exposing (Effects, Never)
+import Html.App exposing (map)
+import Time exposing (millisecond, Time)
 import Drill
 
 type alias Model =
   { drill : Drill.Model }
 
-init : Float -> Float -> (Model, Effects Action)
+init : Float -> Float -> (Model, Cmd Msg)
 init metal work_time =
-  ({ drill = Drill.init metal work_time }, Effects.none)
+  ({ drill = Drill.init metal work_time }, Cmd.none)
 
-type Action
-  = Tick
-  | Drill Drill.Action
+type Msg
+  = Tick Time
+  | Drill Drill.Msg
 
-update : Action -> Model -> (Model, Effects Action)
+update : Msg -> Model -> (Model, Cmd Msg)
 update action model =
     case action of
-      Tick ->
+      Tick time ->
         ({ model |
              drill = Drill.update Drill.Tick model.drill
-         }, Effects.none)
+         }, Cmd.none)
       Drill act ->
         ({ model |
              drill = Drill.update act model.drill
-         }, Effects.none)
+         }, Cmd.none)
 
-view : Signal.Address Action -> Model -> Html
-view address model =
-  Drill.view (Signal.forwardTo address Drill) model.drill
+view : Model -> Html Msg
+view model =
+  map Drill (Drill.view model.drill)
 
+subscriptions model =
+  Time.every (20 * millisecond) Tick
