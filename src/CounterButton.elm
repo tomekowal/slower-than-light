@@ -1,4 +1,4 @@
-module CounterButton (Model, init, Msg(..), update, view) where
+module CounterButton exposing (Model, init, Msg(..), update, view)
 
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (style)
@@ -12,12 +12,12 @@ type alias Model =
   , button_text : String
   }
 
-init : Float -> Float -> Model
-init resource_name button_text =
-  { resource = 0 
+init : String -> Float -> String -> Model
+init resource_name work_time button_text =
+  { resource = 0
   , resource_name = resource_name
   , counter = Nothing
-  , work_time = 0 
+  , work_time = work_time
   , button_text = button_text
   }
 
@@ -28,7 +28,7 @@ type Msg
 update : Msg -> Model -> Model
 update action model =
   case action of
-    DeployDrill ->
+    Click ->
       { model | counter = Just model.work_time }
     Tick ->
       case model.counter of
@@ -39,6 +39,7 @@ update action model =
         Just time -> { model
                      | counter = Just (time - 1) }
 
+buttonStyle : String -> Html.Attribute a
 buttonStyle textColor =
   style
     [ ("position", "relative")
@@ -53,9 +54,10 @@ buttonStyle textColor =
     , ("-khtml-user-select", "none")
     , ("-moz-user-select", "none")
     , ("-ms-user-select", "none")
-    , ("user-select", "none") 
+    , ("user-select", "none")
     , ("color", textColor) ]
 
+coolDownStyle : Float -> Html.Attribute b
 coolDownStyle percent =
   style
     [ ("position", "absolute")
@@ -67,24 +69,29 @@ coolDownStyle percent =
     , ("overflow", "hidden")
     , ("width", (toString percent) ++ "%")]
 
-view : Signal.Address Msg -> Model -> Html
-view address model =
+view : Model -> Html Msg
+view model =
   case model.counter of
     Just counter ->
-      divWithCounter address model counter
+      divWithCounter model counter
     Nothing ->
-      divWithoutCounter address model
+      divWithoutCounter model
 
-divWithoutCounter address model =
+divWithoutCounter : Model -> Html Msg
+divWithoutCounter model =
   div []
-      [ text ("resource: " ++ toString model.resource)
-      , div [ buttonStyle "black", onClick address DeployDrill ]
+      [ text (label model)
+      , div [ buttonStyle "black", onClick Click ]
             [ text "deploy the drill" ]]
 
-divWithCounter address model counter =
+divWithCounter : Model -> Float -> Html Msg
+divWithCounter model counter =
   div []
-      [ text ("resource: " ++ toString model.resource)
+      [ text (label model)
       , div [ buttonStyle "grey" ]
             [ text "deploy the drill" 
             , div [ coolDownStyle (counter / model.work_time * 100) ] []]
       ]
+
+label : Model -> String
+label model = model.resource_name ++ ": " ++ toString model.resource
