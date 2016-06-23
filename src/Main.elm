@@ -12,11 +12,19 @@ main =
               , subscriptions = subscriptions }
 
 type alias Model =
-  { drill : CounterButton.Model }
+  { drill_button : CounterButton.Model
+  , drill_max_work_time : Int
+  , drill_current_work_time : Maybe Int
+  , metal : Int
+  }
 
-init : Float -> Float -> (Model, Cmd Msg)
+init : Int -> Int -> (Model, Cmd Msg)
 init metal work_time =
-  ({ drill = CounterButton.init "metal" work_time "Deploy the drill"}, Cmd.none)
+  ({ drill_button = CounterButton.init "Deploy the drill"
+   , drill_current_work_time = Nothing
+   , drill_max_work_time = work_time
+   , metal = metal
+   }, Cmd.none)
 
 type Msg
   = Tick Time
@@ -26,17 +34,26 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update action model =
     case action of
       Tick time ->
+          case model.drill_current_work_time of
+              Nothing -> ( model, Cmd.none )
+              Just counter ->
+                  case counter == model.drill_max_work_time of
+                      True ->
+                          ({ model | drill_current_work_time = Nothing, metal = model.metal + 1 }
+                          , Cmd.none)
+                      False ->
+                          ({ model | drill_current_work_time = Just (counter + 1) }
+                          , Cmd.none)
+      CounterButton CounterButton.Click ->
         ({ model |
-             drill = CounterButton.update CounterButton.Tick model.drill
-         }, Cmd.none)
-      CounterButton act ->
-        ({ model |
-             drill = CounterButton.update act model.drill
+             drill_current_work_time = Just 0
          }, Cmd.none)
 
 view : Model -> Html Msg
 view model =
-  map CounterButton (CounterButton.view model.drill)
+    div []
+        [map CounterButton (CounterButton.view model.drill_button model.drill_current_work_time model.drill_max_work_time)
+        , div [] [text("metal: " ++ (toString model.metal))]]
 
 subscriptions : Model -> Sub Msg
 subscriptions model =

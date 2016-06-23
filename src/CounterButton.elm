@@ -1,43 +1,18 @@
-module CounterButton exposing (Model, init, Msg(..), update, view)
+module CounterButton exposing (Model, Msg(..), init, view)
 
 import Html exposing (Html, text, div, button)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 
 type alias Model =
-  { resource : Float
-  , resource_name : String
-  , counter : Maybe Float
-  , work_time : Float
-  , button_text : String
-  }
-
-init : String -> Float -> String -> Model
-init resource_name work_time button_text =
-  { resource = 0
-  , resource_name = resource_name
-  , counter = Nothing
-  , work_time = work_time
-  , button_text = button_text
-  }
+  { button_text : String }
 
 type Msg
-  = Tick
-  | Click
+  = Click
 
-update : Msg -> Model -> Model
-update action model =
-  case action of
-    Click ->
-      { model | counter = Just model.work_time }
-    Tick ->
-      case model.counter of
-        Just 0 -> { model
-                  | resource = model.resource + 1
-                  , counter = Nothing }
-        Nothing -> model
-        Just time -> { model
-                     | counter = Just (time - 1) }
+init : String -> Model
+init button_text =
+  { button_text = button_text }
 
 buttonStyle : String -> Html.Attribute a
 buttonStyle textColor =
@@ -69,29 +44,24 @@ coolDownStyle percent =
     , ("overflow", "hidden")
     , ("width", (toString percent) ++ "%")]
 
-view : Model -> Html Msg
-view model =
-  case model.counter of
+view : Model -> Maybe Int -> Int-> Html Msg
+view model counter max_work_time =
+  case counter of
     Just counter ->
-      divWithCounter model counter
+      divWithCounter model counter max_work_time
     Nothing ->
       divWithoutCounter model
 
 divWithoutCounter : Model -> Html Msg
 divWithoutCounter model =
   div []
-      [ text (label model)
-      , div [ buttonStyle "black", onClick Click ]
-            [ text "deploy the drill" ]]
+      [ div [ buttonStyle "black", onClick Click ]
+            [ text model.button_text ]]
 
-divWithCounter : Model -> Float -> Html Msg
-divWithCounter model counter =
+divWithCounter : Model -> Int -> Int -> Html Msg
+divWithCounter model counter_value max_work_time =
   div []
-      [ text (label model)
-      , div [ buttonStyle "grey" ]
-            [ text "deploy the drill" 
-            , div [ coolDownStyle (counter / model.work_time * 100) ] []]
+      [ div [ buttonStyle "grey" ]
+            [ text model.button_text
+            , div [ coolDownStyle ((toFloat counter_value) / (toFloat max_work_time) * 100) ] []]
       ]
-
-label : Model -> String
-label model = model.resource_name ++ ": " ++ toString model.resource
